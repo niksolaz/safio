@@ -1,5 +1,5 @@
 {
-  "name": "troomble",
+  "name": "safio",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,7 +7,13 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "capacitor": "npx cap",
+    "capacitor:sync": "npx cap sync",
+    "capacitor:open:android": "npx cap open android",
+    "capacitor:open:ios": "npx cap open ios",
+    "cap:android": "npm run build && npm run capacitor:sync && npm run capacitor:open:android",
+    "cap:ios": "npm run build && npm run capacitor:sync && npm run capacitor:open:ios"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.4",
