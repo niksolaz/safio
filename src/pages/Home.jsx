@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Settings, Users, Loader2 } from 'lucide-react';
 import { Geolocation } from '@capacitor/geolocation';
+import { CapacitorHttp } from '@capacitor/core';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -18,7 +19,11 @@ export default function Home() {
 
     try {
       // 1. Get Location
-      const coordinates = await Geolocation.getCurrentPosition();
+      const coordinates = await Geolocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      });
       const { latitude, longitude } = coordinates.coords;
 
       setStatusMessage('Recupero contatti...');
@@ -72,13 +77,13 @@ export default function Home() {
           timestamp: new Date().toISOString()
         };
 
-        const response = await fetch(webhookUrl, {
-          method: 'POST',
+        const response = await CapacitorHttp.post({
+          url: webhookUrl,
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
+          data: payload
         });
 
-        if (!response.ok) throw new Error('Errore invio webhook');
+        if (response.status < 200 || response.status >= 300) throw new Error('Errore invio webhook: ' + response.status);
       }
 
       alert(`Segnale ${type} inviato con successo a ${contacts.length} contatti.`);

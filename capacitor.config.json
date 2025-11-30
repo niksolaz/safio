@@ -1,5 +1,10 @@
 {
   "appId": "com.safety.app",
   "appName": "SafetyApp",
-  "webDir": "dist"
+  "webDir": "dist",
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  }
 }
