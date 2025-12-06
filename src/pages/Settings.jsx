@@ -71,7 +71,7 @@ export default function Settings() {
 
   return (
     <div className="page-container">
-      <div className="nav-header" style={{ padding: '0 0 20px 0', border: 'none' }}>
+      <div className="nav-header minimal">
         <ArrowLeft size={24} onClick={() => navigate('/')} style={{ cursor: 'pointer' }} />
         <h2>Impostazioni</h2>
         <div style={{ width: 24 }}></div>

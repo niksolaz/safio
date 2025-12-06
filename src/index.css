@@ -116,6 +116,14 @@ button:focus-visible {
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
+  /* Add safe area padding for notch */
+  padding-top: calc(10px + env(safe-area-inset-top)); 
   background: var(--color-surface);
   border-bottom: 1px solid #eee;
+}
+
+.nav-header.minimal {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: 20px;
+  border: none;
 }
