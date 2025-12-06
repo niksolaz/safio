@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Pencil, Check, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -11,6 +11,10 @@ export default function Contacts() {
   const [loading, setLoading] = useState(true);
   const [newContact, setNewContact] = useState({ name: '', phone: '', email: '' });
   const [showAdd, setShowAdd] = useState(false);
+  
+  // Edit State
+  const [editingId, setEditingId] = useState(null);
+  const [editForm, setEditForm] = useState({ name: '', phone: '', email: '' });
 
   useEffect(() => {
     fetchContacts();
@@ -71,6 +75,40 @@ export default function Contacts() {
     }
   };
 
+  const startEditing = (contact) => {
+    setEditingId(contact.id);
+    setEditForm({
+      name: contact.name,
+      phone: contact.phone,
+      email: contact.email || ''
+    });
+  };
+
+  const cancelEditing = () => {
+    setEditingId(null);
+    setEditForm({ name: '', phone: '', email: '' });
+  };
+
+  const saveEdit = async () => {
+    try {
+      const { error } = await supabase
+        .from('contacts')
+        .update({
+          name: editForm.name,
+          phone: editForm.phone,
+          email: editForm.email
+        })
+        .eq('id', editingId);
+
+      if (error) throw error;
+      
+      setEditingId(null);
+      fetchContacts();
+    } catch (error) {
+      alert('Error updating contact: ' + error.message);
+    }
+  };
+
   return (
     <div className="page-container">
       <div className="nav-header minimal">
@@ -116,12 +154,56 @@ export default function Contacts() {
         ) : (
           contacts.map(contact => (
             <div key={contact.id} style={{ padding: '15px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <strong>{contact.name}</strong>
-                <div style={{ fontSize: '0.9rem', color: '#666' }}>{contact.phone}</div>
-                {contact.email && <div style={{ fontSize: '0.8rem', color: '#999' }}>{contact.email}</div>}
-              </div>
-              <Trash2 size={20} color="#ff4444" onClick={() => deleteContact(contact.id)} style={{ cursor: 'pointer' }} />
+              {editingId === contact.id ? (
+                // Editing View
+                <div style={{ flex: 1, marginRight: '10px' }}>
+                  <input
+                    type="text"
+                    className="input-field"
+                    style={{ marginBottom: '5px', padding: '8px' }}
+                    value={editForm.name}
+                    onChange={(e) => setEditForm({...editForm, name: e.target.value})}
+                    placeholder="Nome"
+                  />
+                  <input
+                    type="tel"
+                    className="input-field"
+                    style={{ marginBottom: '5px', padding: '8px' }}
+                    value={editForm.phone}
+                    onChange={(e) => setEditForm({...editForm, phone: e.target.value})}
+                    placeholder="Telefono"
+                  />
+                  <input
+                    type="email"
+                    className="input-field"
+                    style={{ marginBottom: '5px', padding: '8px' }}
+                    value={editForm.email}
+                    onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                    placeholder="Email"
+                  />
+                 <div style={{ display: 'flex', gap: '10px', marginTop: '5px' }}>
+                    <button onClick={saveEdit} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#00C853', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                       <Check size={20} /> Salva
+                    </button>
+                    <button onClick={cancelEditing} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#666', display: 'flex', alignItems: 'center', gap: '5px' }}>
+                       <X size={20} /> Annulla
+                    </button>
+                 </div>
+                </div>
+              ) : (
+                // Normal View
+                <>
+                  <div style={{ flex: 1 }}>
+                    <strong>{contact.name}</strong>
+                    <div style={{ fontSize: '0.9rem', color: '#666' }}>{contact.phone}</div>
+                    {contact.email && <div style={{ fontSize: '0.8rem', color: '#999' }}>{contact.email}</div>}
+                  </div>
+                  <div style={{ display: 'flex', gap: '15px' }}>
+                    <Pencil size={20} color="#666" onClick={() => startEditing(contact)} style={{ cursor: 'pointer' }} />
+                    <Trash2 size={20} color="#ff4444" onClick={() => deleteContact(contact.id)} style={{ cursor: 'pointer' }} />
+                  </div>
+                </>
+              )}
             </div>
           ))
         )}
